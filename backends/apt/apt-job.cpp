@@ -595,6 +595,7 @@ void AptJob::emitUpdates(PkgList &output, PkBitfield filters)
 // search packages which provide a codec (specified in "values")
 void AptJob::providesCodec(PkgList &output, gchar **values)
 {
+#ifdef HAVE_GST_DEPS
     string arch;
     GstMatcher matcher(values);
     if (!matcher.hasMatches()) {
@@ -638,6 +639,7 @@ void AptJob::providesCodec(PkgList &output, gchar **values)
             output.append(ver);
         }
     }
+#endif
 }
 
 // search packages which provide the libraries specified in "values"
