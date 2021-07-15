@@ -2,9 +2,11 @@ add_languages('cpp')
 
 cpp_compiler = meson.get_compiler('cpp')
 
-gstreamer_dep = dependency('gstreamer-1.0')
-gstreamer_base_dep = dependency('gstreamer-base-1.0')
-gstreamer_plugins_base_dep = dependency('gstreamer-plugins-base-1.0')
+if get_option('gstreamer_plugin')
+  gstreamer_dep = dependency('gstreamer-1.0')
+  gstreamer_base_dep = dependency('gstreamer-base-1.0')
+  gstreamer_plugins_base_dep = dependency('gstreamer-plugins-base-1.0')
+endif
 appstream_dep = dependency('appstream', version: '>=0.16.0')
 apt_pkg_dep = dependency('apt-pkg', version: '>=1.9.2')
 
@@ -25,12 +27,12 @@ if cpp_compiler.compiles(
   ddtp_flag = ['-DHAVE_DDTP']
 endif
 
+aptcc_args = []
 c_args = ['-DG_LOG_DOMAIN="PackageKit-APT"',
           '-DDATADIR="@0@"'.format(join_paths(get_option('prefix'), get_option('datadir'))),
 ]
 
-shared_module(
-  'pk_backend_apt',
+aptcc_sources = [
   'pk-backend-apt.cpp',
   'acqpkitstatus.cpp',
   'acqpkitstatus.h',
@@ -46,24 +48,41 @@ shared_module(
   'apt-utils.h',
   'deb-file.cpp',
   'deb-file.h',
-  'gst-matcher.cpp',
-  'gst-matcher.h',
   'pkg-list.cpp',
-  'pkg-list.h',
-  include_directories: packagekit_src_include,
-  dependencies: [
-    packagekit_glib2_dep,
-    gmodule_dep,
-    apt_pkg_dep,
-    appstream_dep,
+  'pkg-list.h'
+]
+
+aptcc_deps = [
+  packagekit_glib2_dep,
+  gmodule_dep,
+  apt_pkg_dep,
+  appstream_dep,
+]
+
+if get_option('gstreamer_plugin')
+  aptcc_sources += [
+    'gst-matcher.cpp',
+    'gst-matcher.h'
+  ]
+  aptcc_deps += [
     gstreamer_dep,
     gstreamer_base_dep,
-    gstreamer_plugins_base_dep,
-  ],
+    gstreamer_plugins_base_dep
+  ]
+  aptcc_args = ['-DHAVE_GST_DEPS']
+endif
+
+shared_module(
+  'pk_backend_apt',
+  aptcc_sources,
+  include_directories: packagekit_src_include,
+  dependencies: aptcc_deps,
+  include_directories: packagekit_src_include,
   c_args: c_args,
   cpp_args: [
     c_args,
     ddtp_flag,
+    aptcc_args,
   ],
   link_args: [
     '-lutil',
