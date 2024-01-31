@@ -1,6 +1,6 @@
 <!DOCTYPE node PUBLIC
 "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
-"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd" [
+"http://specifications.freedesktop.org/dbus/introspect-latest.dtd" [
   <!ENTITY ERROR_GENERAL "org.freedesktop.packagekit.Denied">
 ]>
 <node name="/" xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
